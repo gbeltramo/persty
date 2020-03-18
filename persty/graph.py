@@ -1,5 +1,7 @@
 import numpy as _np
 from itertools import combinations as _combinations
+import persty.minibox
+import persty.util
 
 #=================================================
 
@@ -40,44 +42,6 @@ def indices_in_box(rect, points, sorted_indices):
             return indices_in
     return indices_in
 
-#=================================================
-
-def minibox_edges(points):
-    """
-    Minibox edges of points in d-dimensional space with
-    Chebyshev distance.
-
-    Parameters
-    ----------
-    points: np.array of shape (n, d)
-        vertices of the minibox graph
-
-    Return
-    ------
-    minibox_edges: list of two-tuples
-        sorted pairs of points, representing the edges of the
-        minibox graph
-    """
-    minibox_edges = []
-
-    dimension = len(points[0])
-    sorted_indices = [_np.argsort(points[:,i])
-                      for i in range(dimension)]
-    all_edges = _combinations(range(len(points)), 2)
-
-    for i, j in all_edges:
-        p, q = points[i], points[j]
-        minibox = _np.array([(min(p[i], q[i]), max(p[i], q[i]))
-                             for i in range(len(p))])
-        indices_in_minibox = indices_in_box(minibox,
-                                            points,
-                                            sorted_indices)
-        if len(indices_in_minibox) == 0:
-            minibox_edges.append((i,j))
-
-    return minibox_edges
-
-#=================================================
 
 def check_hyperrectangle_sides(hyperrectangle, delta):
     sides = _np.abs(hyperrectangle[:,0] - hyperrectangle[:,1])
@@ -170,6 +134,7 @@ def delaunay_edges(points):
     return delaunay_edges
 
 #=================================================
+
 
 def flag_simplices(edges, n, dim=3):
     simplices = []

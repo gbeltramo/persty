@@ -112,8 +112,8 @@ PyMethodDef method_table[] = {
                    METH_VARARGS,
                    "Minibox edges on d-dimensional points"
                    "\n"
-                   "\nFind the Minibox edges iterating on all possible pair of"
-                   "\nindices in `points`."
+                   "\nFind the Minibox edges iterating on all possible"
+                   "\npairs of indices in `points`."
                    "\n"
                    "\nParameters"
                    "\n----------"

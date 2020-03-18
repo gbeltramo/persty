@@ -1,6 +1,7 @@
 from setuptools import setup, find_packages, Extension
 
 minibox_ext = Extension("persty.minibox", ["persty/minibox.c"])
+util_ext = Extension("persty.util", ["persty/util.c"])
 
 setup(
     name = "persty",
@@ -9,7 +10,7 @@ setup(
     author_email="gabri.beltramo@gmail.com",
     description = "Implementation of Minibox and Delauany edges algorithms.",
     packages = find_packages(exclude=['*test']),
-    ext_modules = [minibox_ext],
+    ext_modules = [minibox_ext, util_ext],
     url="https://github.com/gbeltramo/persty",
     license='GPLv3',
     install_requires=['numpy'],
