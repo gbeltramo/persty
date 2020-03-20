@@ -4,22 +4,6 @@
 #include <math.h>
 
 static PyObject*
-clique_simplices(PyObject* self, PyObject* args) {
-    /* Pass in edges, number points, dimension of desired simplices */
-
-    /* Parse arguments */
-    PyObject* points_ptr;
-    if (!PyArg_ParseTuple(args, "O!", &PyList_Type, &points_ptr)) {
-        PyErr_SetString(PyExc_TypeError, "Argument passed needs to be a list");
-        return NULL;
-    }
-
-    PyObject* simplices_ptr = PyList_New(0);
-
-    return simplices_ptr;
-}
-
-static PyObject*
 get_A(PyObject* self, PyObject* args) {
     /* Parse arguments */
     PyObject* args_ptr;
@@ -99,7 +83,6 @@ get_A(PyObject* self, PyObject* args) {
 }
 
 bool ball_and_rect_intersect(PyObject* rect_ptr, PyObject* y_ptr, double radius) {
-    printf("\tInside ball and rect intersect\n");
     Py_ssize_t d = PyList_Size(y_ptr);
 
     for (Py_ssize_t index = 0; index < d; ++index) {
@@ -111,53 +94,68 @@ bool ball_and_rect_intersect(PyObject* rect_ptr, PyObject* y_ptr, double radius)
         double high_i = PyFloat_AsDouble(high_i_ptr);
         /* if y_i is not within low_i-r and high_i+r --> no intersection */
         if (!((low_i - radius < y_i) && (y_i < high_i + radius))) {
-            printf("\tfalse: Returning from ball and rect\n");
             return false;
         }
     }
-    printf("\ttrue: Returning from ball and rect\n");
     return true;
 }
 
-bool update_rect_new_rect(PyObject* rect_ptr, PyObject* new_rect_ptr,
-    double y_i, double radius, Py_ssize_t index, Py_ssize_t d) {
-    PyObject* y_i_plus_r_ptr   = PyFloat_FromDouble(y_i+radius);
-    PyObject* y_i_minus_r_ptr  = PyFloat_FromDouble(y_i-radius);
+double* update_rect_get_new_rect(PyObject* rect_ptr, Py_ssize_t index,
+    double y_i, double radius) {
+    Py_ssize_t d = PyList_Size(rect_ptr) / 2;
+    PyObject* y_i_plus_r_ptr     = PyFloat_FromDouble(y_i+radius);
+    PyObject* y_i_minus_r_ptr    = PyFloat_FromDouble(y_i-radius);
     PyObject* low_i_ptr          = PyList_GetItem(rect_ptr, 2*index);
     PyObject* high_i_ptr         = PyList_GetItem(rect_ptr, 2*index+1);
     double low_i  = PyFloat_AsDouble(low_i_ptr);
     double high_i = PyFloat_AsDouble(high_i_ptr);
+
+    double* new_rect = calloc(2*d, sizeof(double));
+    PyObject* low_i_new_ptr;
+    PyObject* high_i_new_ptr;
+    double low_i_new;
+    double high_i_new;
+
     if (low_i < y_i + radius && y_i + radius < high_i) {
         /* if y_i+r is in [low_i, high_i] new_rect range is [y_i+r, high_i]*/
         for (Py_ssize_t index_new_rect = 0; index_new_rect < d; ++index_new_rect) {
+            low_i_new_ptr          = PyList_GetItem(rect_ptr, 2*index_new_rect);
+            high_i_new_ptr         = PyList_GetItem(rect_ptr, 2*index_new_rect+1);
+            low_i_new  = PyFloat_AsDouble(low_i_new_ptr);
+            high_i_new = PyFloat_AsDouble(high_i_new_ptr);
             if (index_new_rect == index) {
                 PyList_SetItem(rect_ptr, 2*index_new_rect+1, y_i_plus_r_ptr);
-                PyList_SetItem(new_rect_ptr, 2*index_new_rect, y_i_plus_r_ptr);
-                PyList_SetItem(new_rect_ptr, 2*index_new_rect+1, high_i_ptr);
+                new_rect[2*index_new_rect]   = y_i + radius;
+                new_rect[2*index_new_rect+1] = high_i_new;
             } else {
-                PyList_SetItem(new_rect_ptr, 2*index_new_rect, low_i_ptr);
-                PyList_SetItem(new_rect_ptr, 2*index_new_rect+1, high_i_ptr);
+                new_rect[2*index_new_rect]   = low_i_new;
+                new_rect[2*index_new_rect+1] = high_i_new;
             }
         }
-        return true; // append new_rect_ptr
+        return new_rect;
     } else if (low_i < y_i - radius && y_i - radius < high_i) {
         /* if y_i-r is in [low_i, high_i] new_rect range is [low_i, y_i-r]*/
         for (Py_ssize_t index_new_rect = 0; index_new_rect < d; ++index_new_rect) {
+            low_i_new_ptr          = PyList_GetItem(rect_ptr, 2*index_new_rect);
+            high_i_new_ptr         = PyList_GetItem(rect_ptr, 2*index_new_rect+1);
+            low_i_new  = PyFloat_AsDouble(low_i_new_ptr);
+            high_i_new = PyFloat_AsDouble(high_i_new_ptr);
             if (index_new_rect == index) {
                 PyList_SetItem(rect_ptr, 2*index_new_rect, y_i_minus_r_ptr);
-                PyList_SetItem(new_rect_ptr, 2*index_new_rect, low_i_ptr);
-                PyList_SetItem(new_rect_ptr, 2*index_new_rect+1, y_i_minus_r_ptr);
+                new_rect[2*index_new_rect]   = low_i_new;
+                new_rect[2*index_new_rect+1] = y_i - radius;
             } else {
-                PyList_SetItem(new_rect_ptr, 2*index_new_rect, low_i_ptr);
-                PyList_SetItem(new_rect_ptr, 2*index_new_rect+1, high_i_ptr);
+                new_rect[2*index_new_rect]   = low_i_new;
+                new_rect[2*index_new_rect+1] = high_i_new;
             }
         }
-        return true;  // append new_rect_ptr
-    } else { /* [y_i-r, y_i+r] covers [low_i, high_i] */
-        return false; // do not append new_rect_ptr
+        return new_rect;
+    } else {
+        /* [y_i-r, y_i+r] covers [low_i, high_i] */
+        return NULL;
     }
-}
 
+}
 
 static PyObject*
 update_list_hyperrectangles(PyObject* self, PyObject* args) {
@@ -188,33 +186,42 @@ update_list_hyperrectangles(PyObject* self, PyObject* args) {
 
     PyObject* radius_ptr = PyList_GetItem(args_ptr, 2);
     double radius = PyFloat_AsDouble(radius_ptr);
-    printf("\tparsing done\n");
 
-    /* Update hyperect_ptr */
+    /* Update hyperrect_ptr */
     Py_ssize_t d = PyList_Size(y_ptr);
     PyObject* new_hyperrect_ptr = PyList_New(0);
     Py_ssize_t num_hyperrect = PyList_Size(hyperrect_ptr);
-    printf("There are %zu hyperrect\n", num_hyperrect);
+
     PyObject* rect_ptr;
+    double*   new_rect;
     PyObject* new_rect_ptr;
+
     for (Py_ssize_t index_rect = 0; index_rect < num_hyperrect; ++index_rect) {
-        printf("--------\nIter: %zu\n", index_rect);
         rect_ptr = PyList_GetItem(hyperrect_ptr, index_rect);
         if (ball_and_rect_intersect(rect_ptr, y_ptr, radius)) {
-            printf("\tcontinue\n");
             for (Py_ssize_t index = 0; index < d; ++index) {
-                new_rect_ptr  = PyList_New(2*d);
-                PyObject* y_i_ptr = PyList_GetItem(y_ptr, index);
-                PyObject* low_i_ptr = PyList_GetItem(rect_ptr, 2*index);
+                PyObject* y_i_ptr    = PyList_GetItem(y_ptr, index);
+                PyObject* low_i_ptr  = PyList_GetItem(rect_ptr, 2*index);
                 PyObject* high_i_ptr = PyList_GetItem(rect_ptr, 2*index+1);
                 double y_i    = PyFloat_AsDouble(y_i_ptr);
                 double low_i  = PyFloat_AsDouble(low_i_ptr);
                 double high_i = PyFloat_AsDouble(high_i_ptr);
-                printf("\tJust before update_rect_new_rect\n");
-                if (update_rect_new_rect(rect_ptr, new_rect_ptr,
-                    y_i, radius, index, d)) {
-                        PyList_Append(new_hyperrect_ptr, new_rect_ptr);
+                new_rect = update_rect_get_new_rect(rect_ptr,
+                                                    index,
+                                                    y_i,
+                                                    radius);
+                if (new_rect) {
+                    new_rect_ptr = PyList_New(2*d);
+                    for (Py_ssize_t index_new = 0; index_new < d; ++index_new) {
+                        PyObject* low  = PyFloat_FromDouble(new_rect[2*index_new]);
+                        PyObject* high = PyFloat_FromDouble(new_rect[2*index_new+1]);
+
+                        PyList_SetItem(new_rect_ptr, 2*index_new, low);
+                        PyList_SetItem(new_rect_ptr, 2*index_new+1, high);
                     }
+                    PyList_Append(new_hyperrect_ptr, new_rect_ptr);
+                }
+                free(new_rect);
             }
         } else {
             PyList_Append(new_hyperrect_ptr, rect_ptr);
@@ -223,14 +230,79 @@ update_list_hyperrectangles(PyObject* self, PyObject* args) {
     return new_hyperrect_ptr;
 }
 
+bool check(PyObject* edges_ptr, PyObject* indices_edges_in_simplex_ptr,
+           PyObject* simplex_ptr) {
+    Py_ssize_t num_simplex_edges = PyList_Size(indices_edges_in_simplex_ptr);
+    Py_ssize_t num_edges = PyList_Size(edges_ptr);
+
+    PyObject* indices;
+    Py_ssize_t i;
+    Py_ssize_t j;
+    long e1, e2, e3, e4;
+    PyObject* edge;
+
+    bool not_found = true;
+    for (Py_ssize_t index = 0; index < num_simplex_edges; ++index) {
+        not_found = true;
+        indices = PyList_GetItem(indices_edges_in_simplex_ptr, index);
+        i = PyLong_AsSsize_t(PyTuple_GetItem(indices, 0));
+        j = PyLong_AsSsize_t(PyTuple_GetItem(indices, 1));
+
+        e1 = PyLong_AsLong(PyTuple_GetItem(simplex_ptr, i));
+        e2 = PyLong_AsLong(PyTuple_GetItem(simplex_ptr, j));
+
+        for (Py_ssize_t index_edge = 0; index_edge < num_edges; ++index_edge) {
+            edge = PyList_GetItem(edges_ptr, index_edge);
+            e3 = PyLong_AsLong(PyList_GetItem(edge, 0));
+            e4 = PyLong_AsLong(PyList_GetItem(edge, 1));
+            if (e1 == e3 && e2 == e4) {
+                not_found = false;
+                break;
+            }
+        }
+        if (not_found) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+static PyObject*
+cliques(PyObject* self, PyObject* args) {
+    /* Parse arguments */
+    PyObject* args_ptr;
+    if (!PyArg_ParseTuple(args, "O!", &PyList_Type, &args_ptr)) {
+        PyErr_SetString(PyExc_TypeError, "Argument passed needs to be a list");
+        return NULL;
+    }
+
+    PyObject* edges_ptr = PyList_GetItem(args_ptr, 0);
+    if (!PyList_Check(edges_ptr)) {
+        PyErr_SetString(PyExc_TypeError, "First argument needs to be list.");
+        return NULL;
+    }
+
+    PyObject* all_simplices_ptr = PyList_GetItem(args_ptr, 1);
+    PyObject* indices_edges_in_simplex_ptr = PyList_GetItem(args_ptr, 2);
+    PyObject* number_points_ptr = PyList_GetItem(args_ptr, 3);
+
+    long number_points = PyLong_AsLong(number_points_ptr);
+    Py_ssize_t number_simplices = PyList_Size(all_simplices_ptr);
+    PyObject* simplices_ptr = PyList_New(0);
+    PyObject* simplex_ptr;
+    for (Py_ssize_t i = 0; i < number_simplices; ++i) {
+        simplex_ptr = PyList_GetItem(all_simplices_ptr, i);
+        if (check(edges_ptr, indices_edges_in_simplex_ptr, simplex_ptr)) {
+            PyList_Append(simplices_ptr, simplex_ptr);
+        }
+    }
+
+    return simplices_ptr;
+}
+
 // 2 TABLE OF METHODS TO EXPORT
 PyMethodDef method_table[] = {
-    {"clique_simplices",
-     (PyCFunction) clique_simplices,
-     METH_VARARGS,
-     "Find d dimensional cliques on given edges."
-     "\n"
- },
     {"get_A",
      (PyCFunction) get_A,
      METH_VARARGS,
@@ -241,6 +313,12 @@ PyMethodDef method_table[] = {
      (PyCFunction) update_list_hyperrectangles,
      METH_VARARGS,
      "Find new list of hyperrectangles"
+     "\n"
+    },
+    {"cliques",
+     (PyCFunction) cliques,
+     METH_VARARGS,
+     "Find d dimensional cliques on given edges."
      "\n"
     },
 	{NULL, NULL, 0, NULL} // end of table
