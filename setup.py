@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages, Extension
 
 minibox_ext = Extension("persty.minibox", ["persty/minibox.c"])
-util_ext = Extension("persty.util", ["persty/util.c"])
+util_ext = Extension("persty.c_util", ["persty/c_util.c"])
 
 setup(
     name = "persty",

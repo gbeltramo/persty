@@ -230,77 +230,6 @@ update_list_hyperrectangles(PyObject* self, PyObject* args) {
     return new_hyperrect_ptr;
 }
 
-bool check(PyObject* edges_ptr, PyObject* indices_edges_in_simplex_ptr,
-           PyObject* simplex_ptr) {
-    Py_ssize_t num_simplex_edges = PyList_Size(indices_edges_in_simplex_ptr);
-    Py_ssize_t num_edges = PyList_Size(edges_ptr);
-
-    PyObject* indices;
-    Py_ssize_t i;
-    Py_ssize_t j;
-    long e1, e2, e3, e4;
-    PyObject* edge;
-
-    bool not_found = true;
-    for (Py_ssize_t index = 0; index < num_simplex_edges; ++index) {
-        not_found = true;
-        indices = PyList_GetItem(indices_edges_in_simplex_ptr, index);
-        i = PyLong_AsSsize_t(PyTuple_GetItem(indices, 0));
-        j = PyLong_AsSsize_t(PyTuple_GetItem(indices, 1));
-
-        e1 = PyLong_AsLong(PyTuple_GetItem(simplex_ptr, i));
-        e2 = PyLong_AsLong(PyTuple_GetItem(simplex_ptr, j));
-
-        for (Py_ssize_t index_edge = 0; index_edge < num_edges; ++index_edge) {
-            edge = PyList_GetItem(edges_ptr, index_edge);
-            e3 = PyLong_AsLong(PyList_GetItem(edge, 0));
-            e4 = PyLong_AsLong(PyList_GetItem(edge, 1));
-            if (e1 == e3 && e2 == e4) {
-                not_found = false;
-                break;
-            }
-        }
-        if (not_found) {
-            return false;
-        }
-    }
-    return true;
-}
-
-
-static PyObject*
-cliques(PyObject* self, PyObject* args) {
-    /* Parse arguments */
-    PyObject* args_ptr;
-    if (!PyArg_ParseTuple(args, "O!", &PyList_Type, &args_ptr)) {
-        PyErr_SetString(PyExc_TypeError, "Argument passed needs to be a list");
-        return NULL;
-    }
-
-    PyObject* edges_ptr = PyList_GetItem(args_ptr, 0);
-    if (!PyList_Check(edges_ptr)) {
-        PyErr_SetString(PyExc_TypeError, "First argument needs to be list.");
-        return NULL;
-    }
-
-    PyObject* all_simplices_ptr = PyList_GetItem(args_ptr, 1);
-    PyObject* indices_edges_in_simplex_ptr = PyList_GetItem(args_ptr, 2);
-    PyObject* number_points_ptr = PyList_GetItem(args_ptr, 3);
-
-    long number_points = PyLong_AsLong(number_points_ptr);
-    Py_ssize_t number_simplices = PyList_Size(all_simplices_ptr);
-    PyObject* simplices_ptr = PyList_New(0);
-    PyObject* simplex_ptr;
-    for (Py_ssize_t i = 0; i < number_simplices; ++i) {
-        simplex_ptr = PyList_GetItem(all_simplices_ptr, i);
-        if (check(edges_ptr, indices_edges_in_simplex_ptr, simplex_ptr)) {
-            PyList_Append(simplices_ptr, simplex_ptr);
-        }
-    }
-
-    return simplices_ptr;
-}
-
 // 2 TABLE OF METHODS TO EXPORT
 PyMethodDef method_table[] = {
     {"get_A",
@@ -315,20 +244,14 @@ PyMethodDef method_table[] = {
      "Find new list of hyperrectangles"
      "\n"
     },
-    {"cliques",
-     (PyCFunction) cliques,
-     METH_VARARGS,
-     "Find d dimensional cliques on given edges."
-     "\n"
-    },
 	{NULL, NULL, 0, NULL} // end of table
 };
 
 // 3 STRUCT DEFINING MODULE
-PyModuleDef util_module = {
+PyModuleDef c_util_module = {
 			      PyModuleDef_HEAD_INIT,
-			      "util",             // name of module
-			      "Functions to speed up Delaunay edges computations.",
+			      "c_util",             // name of module
+			      "C extension functions for Delaunay edges computations.",
 			      -1,
 			      method_table,
 			      NULL, NULL,
@@ -336,7 +259,7 @@ PyModuleDef util_module = {
 };
 
 // 4 INIT FUNC
-PyMODINIT_FUNC PyInit_util(void)   // PyInit_<NAME_OF_MODULE>
+PyMODINIT_FUNC PyInit_c_util(void)   // PyInit_<NAME_OF_MODULE>
 {
-  return PyModule_Create(&util_module);
+  return PyModule_Create(&c_util_module);
 }

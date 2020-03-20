@@ -64,7 +64,7 @@ edges(PyObject* self, PyObject* args) {
 
     /* Search Minibox edges */
     PyObject* edges_ptr = PyList_New(0);         // empty output list
-    PyObject* e_ptr = PyList_New(2);
+    PyObject* e_ptr = PyTuple_New(2);
     double* p_ptr;
     double* q_ptr;
     double* mini_pq;
@@ -73,11 +73,11 @@ edges(PyObject* self, PyObject* args) {
 
     for (size_t first_ind = 0; first_ind < n; ++first_ind) {
         for (size_t second_ind = first_ind+1; second_ind < n; ++second_ind) {
-            e_ptr = PyList_New(2);               // avoid aliasing
+            e_ptr = PyTuple_New(2);               // avoid aliasing
             PyObject* value0_ptr = PyLong_FromSize_t(first_ind);
             PyObject* value1_ptr = PyLong_FromSize_t(second_ind);
-            PyList_SetItem(e_ptr, 0, value0_ptr);
-            PyList_SetItem(e_ptr, 1, value1_ptr);
+            PyTuple_SetItem(e_ptr, 0, value0_ptr);
+            PyTuple_SetItem(e_ptr, 1, value1_ptr);
 
             p_ptr = (array_ptr + first_ind*d);
             q_ptr = (array_ptr + second_ind*d);
