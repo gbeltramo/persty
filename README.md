@@ -17,13 +17,13 @@ pip install git+https://github.com/gbeltramo/persty.git
 ## Usage
 
 ```python
+import numpy as np
 import persty.minibox
+import persty.delaunay
 
-points = [[1., 1.],
-          [2., 3.],
-          [4., -1.],
-          [-3., 8.],
-          [0., 2.3]]
+np.random.seed(0)
+points = np.random.rand(20, 2).tolist()
 
-mini_edges = persty.minibox.edges(points)
+minibox_edges = persty.minibox.edges(points)
+delaunay_edges = persty.delaunay.edges(points)
 ```
