@@ -37,7 +37,7 @@ with open("README.md", "r") as f:
 
 setup(
     name = "persty",
-    version = "0.2.2",
+    version = "0.2.3",
     author="Gabriele Beltramo",
     author_email="gabri.beltramo@gmail.com",
     description = "Implementation of Minibox and Delauany edges algorithms.",
