@@ -65,11 +65,11 @@ edges(PyObject* self, PyObject* args) {
     /* Search Minibox edges */
     PyObject* edges_ptr = PyList_New(0);         // empty output list
     PyObject* e_ptr = PyTuple_New(2);
-    double* p_ptr;
-    double* q_ptr;
-    double* mini_pq;
-    double* y_ptr;
-    bool add_edge;
+    double* p_ptr = 0;
+    double* q_ptr = 0;
+    double* mini_pq = 0;
+    double* y_ptr = 0;
+    bool add_edge = true;
 
     for (size_t first_ind = 0; first_ind < n; ++first_ind) {
         for (size_t second_ind = first_ind+1; second_ind < n; ++second_ind) {
