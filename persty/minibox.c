@@ -3,25 +3,11 @@
 #include <stdbool.h>
 
 // 1 METHODS
-double* minibox_array(double* p_ptr, double* q_ptr, size_t d) {
-    double* mini_pq = calloc(2*d, sizeof(double));
-    for (size_t i = 0; i < d; ++i) {
-        double p_i = p_ptr[i];
-        double q_i = q_ptr[i];
-        if (p_i <= q_i) {
-            mini_pq[2*i]   = p_i;
-            mini_pq[2*i+1] = q_i;
-        } else {
-            mini_pq[2*i]   = q_i;
-            mini_pq[2*i+1] = p_i;
-        }
-    }
-    return mini_pq;
-}
-
-bool y_inside_minibox(double* mini_pq, double* y_ptr, size_t d) {
-    for (size_t i = 0; i < d; ++i) {
-        if (y_ptr[i] <= mini_pq[2*i] || y_ptr[i] >= mini_pq[2*i+1]) {
+bool y_inside_minibox(double* mini_pq, double* y, Py_ssize_t d) {
+    double y_i = 0.0;
+    for (Py_ssize_t i = 0; i < d; ++i) {
+        y_i = y[i];
+        if (y_i <= mini_pq[2*i] || y_i >= mini_pq[2*i+1]) {
             return false;
         }
     }
@@ -31,23 +17,27 @@ bool y_inside_minibox(double* mini_pq, double* y_ptr, size_t d) {
 static PyObject*
 edges(PyObject* self, PyObject* args) {
     /* Parse arguments */
-    PyObject* points_ptr;
-    if (!PyArg_ParseTuple(args, "O!", &PyList_Type, &points_ptr)) {
+    PyObject* points_pyptr;
+    if (!PyArg_ParseTuple(args, "O!", &PyList_Type, &points_pyptr)) {
         PyErr_SetString(PyExc_TypeError, "Argument passed needs to be a list");
         return NULL;
     }
 
-    Py_ssize_t n = PyList_Size(points_ptr);
-    PyObject* first_item_ptr = PyList_GetItem(points_ptr, 0);
-    Py_ssize_t d = PyList_Size(first_item_ptr);
+    Py_ssize_t n = PyList_Size(points_pyptr);
+    PyObject* first_item_pyptr = PyList_GetItem(points_pyptr, 0);
+    if(!PyList_Check(first_item_pyptr)) {
+        PyErr_SetString(PyExc_TypeError, "List items must be lists.");
+        return NULL;
+    }
+    Py_ssize_t d = PyList_Size(first_item_pyptr);
 
     /* Read points into dynamically allocated array */
-    double* array_ptr = calloc(n*d, sizeof(double));
-
+    double* array_points = calloc(n*d, sizeof(double));
+    PyObject*  tmp_item_pyptr;
     for (Py_ssize_t index = 0; index < n; ++index) {
-        PyObject* tmp_item_ptr = PyList_GetItem(points_ptr, index);
-        Py_ssize_t tmp_d = PyList_Size(tmp_item_ptr);
-        if(!PyList_Check(tmp_item_ptr)) {
+        tmp_item_pyptr = PyList_GetItem(points_pyptr, index);
+        Py_ssize_t tmp_d = PyList_Size(tmp_item_pyptr);
+        if(!PyList_Check(tmp_item_pyptr)) {
             PyErr_SetString(PyExc_TypeError, "List items must be lists.");
             return NULL;
         }
@@ -55,54 +45,64 @@ edges(PyObject* self, PyObject* args) {
             PyErr_SetString(PyExc_TypeError, "Sublist must contain d elements.");
             return NULL;
         }
-        for (Py_ssize_t coord = 0; coord < d; ++coord) {
-            PyObject* value_ptr = PyList_GetItem(tmp_item_ptr, coord);
-            double value = PyFloat_AsDouble(value_ptr);
-            array_ptr[index*d+coord] = value;
+        for (Py_ssize_t i = 0; i < d; ++i) {
+            array_points[index*d+i] = PyFloat_AsDouble(PyList_GetItem(tmp_item_pyptr, i));
         }
     }
 
     /* Search Minibox edges */
-    PyObject* edges_ptr = PyList_New(0);         // empty output list
-    PyObject* e_ptr = PyTuple_New(2);
-    double* p_ptr = 0;
-    double* q_ptr = 0;
-    double* mini_pq = 0;
-    double* y_ptr = 0;
+    PyObject* edges_pyptr = PyList_New(0);         // empty output list
+    PyObject* e_pyptr = PyTuple_New(2);
+
+    double* p;
+    double* q;
+    double* y;
+    double* mini_pq = calloc(2*d, sizeof(double));
     bool add_edge = true;
 
-    for (size_t first_ind = 0; first_ind < n; ++first_ind) {
-        for (size_t second_ind = first_ind+1; second_ind < n; ++second_ind) {
-            e_ptr = PyTuple_New(2);               // avoid aliasing
-            PyObject* value0_ptr = PyLong_FromSize_t(first_ind);
-            PyObject* value1_ptr = PyLong_FromSize_t(second_ind);
-            PyTuple_SetItem(e_ptr, 0, value0_ptr);
-            PyTuple_SetItem(e_ptr, 1, value1_ptr);
+    for (Py_ssize_t p_ind = 0; p_ind < n; ++p_ind) {
+        for (Py_ssize_t q_ind = p_ind+1; q_ind < n; ++q_ind) {
+            e_pyptr = PyTuple_New(2);               // avoid aliasing
+            PyTuple_SetItem(e_pyptr, 0, PyLong_FromSsize_t(p_ind));
+            PyTuple_SetItem(e_pyptr, 1, PyLong_FromSsize_t(q_ind));
 
-            p_ptr = (array_ptr + first_ind*d);
-            q_ptr = (array_ptr + second_ind*d);
-            mini_pq = minibox_array(p_ptr, q_ptr, d);
+            /* init p and q */
+            p = (array_points + p_ind*d);
+            q = (array_points + q_ind*d);
+
+            /* init mini_pq */
+            for (Py_ssize_t i = 0; i < d; ++i) {
+                double p_i = p[i];
+                double q_i = q[i];
+                if (p_i <= q_i) {
+                    mini_pq[2*i]   = p_i;
+                    mini_pq[2*i+1] = q_i;
+                } else {
+                    mini_pq[2*i]   = q_i;
+                    mini_pq[2*i+1] = p_i;
+                }
+            }
+
             add_edge = true;
-
-            for (size_t y_ind = 0; y_ind < n; ++y_ind) {
-                if (y_ind == first_ind || y_ind == second_ind) {
+            for (Py_ssize_t y_ind = 0; y_ind < n; ++y_ind) {
+                if (y_ind == p_ind || y_ind == q_ind) {
                     continue;
                 }
-                y_ptr = (array_ptr + y_ind*d);
-                if(y_inside_minibox(mini_pq, y_ptr, d)) {
+                y = (array_points + y_ind*d);
+                if(y_inside_minibox(mini_pq, y, d)) {
                     add_edge = false;
                     break;
                 }
             }
             if (add_edge) {
-                PyList_Append(edges_ptr, e_ptr);
+                PyList_Append(edges_pyptr, e_pyptr);
             }
         }
     }
-    free(array_ptr);
-    free(mini_pq);
 
-    return edges_ptr;
+    free(array_points);
+    free(mini_pq);
+    return edges_pyptr;
 }
 
 // 2 TABLE OF METHODS TO EXPORT
