@@ -1,8 +1,10 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
+#include <stdio.h>
 #include <stdbool.h>
 
-// 1 METHODS
+/* ===================================================== */
+
 bool y_inside_minibox(double* mini_pq, double* y, Py_ssize_t d) {
     double y_i = 0.0;
     for (Py_ssize_t i = 0; i < d; ++i) {
@@ -14,57 +16,116 @@ bool y_inside_minibox(double* mini_pq, double* y, Py_ssize_t d) {
     return true;
 }
 
+/* ----------------------------------------------------- */
+
+PyDoc_STRVAR(edges_doc,
+    "edges(points)\n\
+    \n\
+    Return Minibox edges on d-dimensional points.\n\
+    \n\
+    Find the Minibox edges iterating on all possible\n\
+    pairs of indices in `points`.\n\
+    \n\
+    Parameters\n"
+    "----------\n\
+    points: list of `n` lists containing `d` floats each\n\
+    \tThe list of d-dimensional points.\n\
+    \n\
+    Return\n"
+    "------\n\
+    minibox_edges: list of pairs of integers\n\
+    \tThe indices of elements in `points` forming a\n\
+    \tMinibox edge.\n");
+
 static PyObject*
 edges(PyObject* self, PyObject* args) {
     /* Parse arguments */
-    PyObject* points_pyptr;
-    if (!PyArg_ParseTuple(args, "O!", &PyList_Type, &points_pyptr)) {
+    PyObject* points_py = NULL;
+    PyObject* first_point_py = NULL;
+    Py_ssize_t n = 0;
+    Py_ssize_t d = 0;
+    if (!PyArg_ParseTuple(args, "O!", &PyList_Type, &points_py)) {
         PyErr_SetString(PyExc_TypeError, "Argument passed needs to be a list");
         return NULL;
     }
 
-    Py_ssize_t n = PyList_Size(points_pyptr);
-    PyObject* first_item_pyptr = PyList_GetItem(points_pyptr, 0);
-    if(!PyList_Check(first_item_pyptr)) {
+    n = PyList_Size(points_py);
+    first_point_py = PyList_GetItem(points_py, 0);
+    if(!PyList_Check(first_point_py)) {
         PyErr_SetString(PyExc_TypeError, "List items must be lists.");
         return NULL;
     }
-    Py_ssize_t d = PyList_Size(first_item_pyptr);
+    d = PyList_Size(first_point_py);
 
     /* Read points into dynamically allocated array */
     double* array_points = calloc(n*d, sizeof(double));
-    PyObject*  tmp_item_pyptr;
+    if (!array_points) {
+        return PyErr_NoMemory();
+    }
+    PyObject* tmp_py = NULL;
+    PyObject* coord_py = NULL;
+    Py_ssize_t tmp_d = 0;
+    double coord_i = 0;
     for (Py_ssize_t index = 0; index < n; ++index) {
-        tmp_item_pyptr = PyList_GetItem(points_pyptr, index);
-        Py_ssize_t tmp_d = PyList_Size(tmp_item_pyptr);
-        if(!PyList_Check(tmp_item_pyptr)) {
+        tmp_py = PyList_GetItem(points_py, index);
+        tmp_d = PyList_Size(tmp_py);
+        if(!PyList_Check(tmp_py)) {
             PyErr_SetString(PyExc_TypeError, "List items must be lists.");
+            free(array_points);
             return NULL;
         }
         if(tmp_d != d) {
             PyErr_SetString(PyExc_TypeError, "Sublist must contain d elements.");
+            free(array_points);
             return NULL;
         }
         for (Py_ssize_t i = 0; i < d; ++i) {
-            array_points[index*d+i] = PyFloat_AsDouble(PyList_GetItem(tmp_item_pyptr, i));
+            coord_py = PyList_GetItem(tmp_py, i);
+            if (!coord_py) {
+                free(array_points);
+                return NULL;
+            }
+            coord_i = PyFloat_AsDouble(coord_py);
+            if (PyErr_Occurred()) {
+                printf("could not convert coord_py to coord_i\n");
+                free(array_points);
+                return NULL;
+            }
+            array_points[index*d+i] = coord_i;
         }
     }
 
     /* Search Minibox edges */
-    PyObject* edges_pyptr = PyList_New(0);         // empty output list
-    PyObject* e_pyptr = PyTuple_New(2);
+    PyObject* edges_py = PyList_New(0);
+    PyObject* e_py = NULL;
 
-    double* p;
-    double* q;
-    double* y;
     double* mini_pq = calloc(2*d, sizeof(double));
+    if (!mini_pq) {
+        free(array_points);
+        return NULL;
+    }
+    double* p = NULL;
+    double p_i = 0.0;
+    double* q = NULL;
+    double q_i = 0.0;
+    double* y = NULL;
     bool add_edge = true;
-
+    int append_ok = 0;
     for (Py_ssize_t p_ind = 0; p_ind < n; ++p_ind) {
         for (Py_ssize_t q_ind = p_ind+1; q_ind < n; ++q_ind) {
-            e_pyptr = PyTuple_New(2);               // avoid aliasing
-            PyTuple_SetItem(e_pyptr, 0, PyLong_FromSsize_t(p_ind));
-            PyTuple_SetItem(e_pyptr, 1, PyLong_FromSsize_t(q_ind));
+            e_py = PyTuple_New(2);
+            if (!e_py) {
+                printf("could not create PyTuple_New(2)\n");
+                free(mini_pq);
+                free(array_points);
+                return NULL;
+            }
+            if (PyTuple_SetItem(e_py, 0, PyLong_FromSsize_t(p_ind)) != 0 ||
+                PyTuple_SetItem(e_py, 1, PyLong_FromSsize_t(q_ind)) != 0) {
+                free(mini_pq);
+                free(array_points);
+                return NULL;
+            }
 
             /* init p and q */
             p = (array_points + p_ind*d);
@@ -72,8 +133,8 @@ edges(PyObject* self, PyObject* args) {
 
             /* init mini_pq */
             for (Py_ssize_t i = 0; i < d; ++i) {
-                double p_i = p[i];
-                double q_i = q[i];
+                p_i = p[i];
+                q_i = q[i];
                 if (p_i <= q_i) {
                     mini_pq[2*i]   = p_i;
                     mini_pq[2*i+1] = q_i;
@@ -95,54 +156,48 @@ edges(PyObject* self, PyObject* args) {
                 }
             }
             if (add_edge) {
-                PyList_Append(edges_pyptr, e_pyptr);
+                append_ok = PyList_Append(edges_py, e_py);
+                if (append_ok != 0) {
+                    free(mini_pq);
+                    free(array_points);
+                    return NULL;
+                }
+                Py_DECREF(e_py);
             }
         }
     }
 
     free(array_points);
     free(mini_pq);
-    return edges_pyptr;
+    return edges_py;
 }
 
-// 2 TABLE OF METHODS TO EXPORT
+/* ===================================================== */
+
 PyMethodDef method_table[] = {
-                  {"edges",
-                   (PyCFunction) edges,
-                   METH_VARARGS,
-                   "Minibox edges on d-dimensional points"
-                   "\n"
-                   "\nFind the Minibox edges iterating on all possible"
-                   "\npairs of indices in `points`."
-                   "\n"
-                   "\nParameters"
-                   "\n----------"
-                   "\npoints: list of `n` lists containing `d` floats each"
-                   "\n\tThe list of d-dimensional points."
-                   "\n"
-                   "\nReturn"
-                   "\n------"
-                   "\nminibox_edges: list of pairs of integers"
-                   "\n\tThe indices of elements in `points` forming a"
-                   "\n\tMinibox edge."
-                   "\n "
-                   "\n"},
-			      {NULL, NULL, 0, NULL} // end of table
+    {"edges", (PyCFunction) edges, METH_VARARGS, edges_doc},
+	{NULL, NULL, 0, NULL}
 };
 
-// 3 STRUCT DEFINING MODULE
+/* ===================================================== */
+
+PyDoc_STRVAR(module_doc,
+"Module for computing minibox edges.");
+
 PyModuleDef minibox_module = {
 			      PyModuleDef_HEAD_INIT,
-			      "minibox",             // name of module
-			      "Minibox edges C extension",
+			      "minibox",
+			      module_doc,
 			      -1,
 			      method_table,
 			      NULL, NULL,
 			      NULL, NULL
 };
 
-// 4 INIT FUNC
-PyMODINIT_FUNC PyInit_minibox(void)   // PyInit_<NAME_OF_MODULE>
+/* ===================================================== */
+
+PyMODINIT_FUNC
+PyInit_minibox(void)
 {
   return PyModule_Create(&minibox_module);
 }
