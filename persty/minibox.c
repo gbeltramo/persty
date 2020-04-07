@@ -19,20 +19,20 @@ bool y_inside_minibox(double* mini_pq, double* y, Py_ssize_t d) {
 /* ----------------------------------------------------- */
 
 PyDoc_STRVAR(edges_doc,
-    "edges(points)\n\
+    "persty.minibox.edges(points)\n\
     \n\
     Return Minibox edges on d-dimensional points.\n\
     \n\
     Find the Minibox edges iterating on all possible\n\
     pairs of indices in `points`.\n\
     \n\
-    Parameters\n"
-    "----------\n\
-    points: list of `n` lists containing `d` floats each\n\
+    Parameters\n\
+    \----------\n\
+    points: list of `n` lists\n\
     \tThe list of d-dimensional points.\n\
     \n\
-    Return\n"
-    "------\n\
+    Return\n\
+    \-------\n\
     minibox_edges: list of pairs of integers\n\
     \tThe indices of elements in `points` forming a\n\
     \tMinibox edge.\n");
