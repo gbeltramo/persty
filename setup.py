@@ -17,7 +17,7 @@ if platform.system() == "Windows":
     else:
         extra_compile_args += ["/O2"]
 else:
-    extra_compile_args += ["-std=c++11", "-Wall"]
+    extra_compile_args += ["-Wall"]
     if _DEBUG:
         extra_compile_args += ["-g", "-Og"]
     else:
@@ -37,7 +37,7 @@ with open("README.md", "r") as f:
 
 setup(
     name = "persty",
-    version = "0.2.3",
+    version = "0.3.0",
     author="Gabriele Beltramo",
     author_email="gabri.beltramo@gmail.com",
     description = "Implementation of Minibox and Delauany edges algorithms.",
