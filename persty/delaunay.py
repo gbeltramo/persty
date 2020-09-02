@@ -2,6 +2,9 @@ import persty.minibox
 import persty.c_util
 from scipy.spatial.distance import chebyshev
 
+def _foo():
+    return 1
+
 def edges(points):
     """Delaunay edges on d-dimensional points
 
