@@ -9,7 +9,8 @@ def test_edges(points):
             mini = [[min(a, b), max(a,b)] for a, b in zip(p,q)]
             add_edge = True
             for z in points:
-                if all([ (a < z[k]) and (z[k] < b) for k, (a, b) in enumerate(mini)]):
+                cond = all([ (a < z[k]) and (z[k] < b) for k, (a, b) in enumerate(mini)])
+                if cond:
                     add_edge = False
                     break
             if add_edge:

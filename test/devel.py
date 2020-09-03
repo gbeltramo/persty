@@ -21,17 +21,23 @@ print("edges Py:",  ed2[:3], "len(edges) -->", len(ed2))
 print("Equal?", ed1 == ed2)
 
 # test utils
-# p = np.array([0, 0, 0])
-# q = np.array([1, -1, 1])
-# z = np.array([0.5, -0.5, 0.5])
-# mini = persty.cpp.minibox.get_minibox(p, q)
-# print("minibox", mini)
-# print("True?", persty.cpp.minibox.is_inside(z, mini))
+p = np.array([0, 0, 0])
+q = np.array([1, -1, 1])
+z = np.array([0.5, -0.5, 0.5])
+mini = persty.cpp.minibox.get_minibox(p, q)
+print("minibox", mini)
+print("True?", persty.cpp.minibox.is_inside(z, mini))
+print("-"*10)
+
+
 
 # timing
-N, d = 5_000, 3
+N, d = 8000, 3
+np.random.seed(0)
 points2 = np.random.rand(N, d)
 s1 = time()
-_ = persty.minibox.edges_n_dim(points2)
-print(f"STL vector time: {time() - s1} sec.")
+ed1 = persty.minibox.edges_n_dim(points2)
+print(f"Time1: {time() - s1:.5f} sec.")
+s2 = time()
+
 print("-"*60)
