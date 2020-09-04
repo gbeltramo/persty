@@ -35,7 +35,10 @@ def edges(points):
     assert len(points.shape) == 2, "points must have shape (n,d), with n number points and d their dimension"
     dimension = len(points[0])
     if dimension == 2:
-        return _cpp.minibox_edges_2D(points)
+        sorted_indices = np.argsort(points[:,0])
+        points = points[sorted_indices]
+        res = _cpp.minibox_edges_2D(points)
+        return [tuple(sorted((sorted_indices[i], sorted_indices[j]))) for i, j in res]
     elif dimension == 3:
         return _cpp.brute_minibox_edges(points)
     elif dimension > 3:

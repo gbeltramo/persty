@@ -11,14 +11,15 @@ using namespace std;
 namespace persty_delaunay {
 
     vector<tuple<size_t, size_t>> edges_2D(vector<vector<double>> points) {
+        // points need to be sorted along x-axis
         size_t n = points.size();
 
-        //obtain indices sorted along 0 dimension, then sort points
-        vector<size_t> sorted_indices = persty_util::sort_indices_one_dimension(points, 0);
-        sort(points.begin(), points.end(),
-             [](const vector<double>& x, const vector<double>& y) {
-                    return x[0] < y[0];
-             });
+        // //obtain indices sorted along 0 dimension, then sort points
+        // vector<size_t> sorted_indices = persty_util::sorted_indices_one_dimension(points, 0);
+        // sort(points.begin(), points.end(),
+        //      [](const vector<double>& x, const vector<double>& y) {
+        //             return x[0] < y[0];
+        //      });
 
         vector<tuple<size_t, size_t>> edges = {};
         for (size_t i = 0; i < n; ++i) {
@@ -33,21 +34,18 @@ namespace persty_delaunay {
                 double q_y = points[j][1];
                 if (q_y > p_y) {
                     if (q_y <= front_above) {
-                        tuple<size_t, size_t> e = {sorted_indices[i],
-                                                   sorted_indices[j]};
+                        tuple<size_t, size_t> e = {i, j};
                         edges.push_back(e);
                         front_above = q_y;
                     }
                 } else if (q_y < p_y) {
                     if (q_y >= front_below) {
-                        tuple<size_t, size_t> e = {sorted_indices[i],
-                                                   sorted_indices[j]};
+                        tuple<size_t, size_t> e = {i, j};
                         edges.push_back(e);
                         front_below = q_y;
                     }
                 } else {   // collinear
-                    tuple<size_t, size_t> e = {sorted_indices[i],
-                                               sorted_indices[j]};
+                    tuple<size_t, size_t> e = {i, j};
                     edges.push_back(e);
                 }
                 if ( (front_above - front_below) < (q_x - p_x) ) {

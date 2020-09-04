@@ -3,6 +3,7 @@
 
 #include "inc/util.hpp"
 #include "inc/minibox.hpp"
+#include "inc/delaunay.hpp"
 
 using namespace std;
 
@@ -10,9 +11,10 @@ PYBIND11_MODULE(binding, m) {
     m.doc() = "";
     m.def("get_minibox", &persty_util::get_minibox);
     m.def("is_inside", &persty_util::is_inside);
-    m.def("sort_indices_one_dimension", &persty_util::sort_indices_one_dimension);
+    m.def("sorted_indices_one_dimension", &persty_util::sorted_indices_one_dimension);
     m.def("minibox_edges_2D", &persty_minibox::edges_2D);
     m.def("brute_minibox_edges", &persty_minibox::brute_edges);
+    m.def("delaunay_edges_2D", &persty_delaunay::edges_2D);
 
 #ifdef VERSION_INFO
     m.attr("__version__") = VERSION_INFO;

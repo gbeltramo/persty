@@ -32,8 +32,8 @@ namespace persty_util {
         return true;
     }
 
-    vector<size_t> sort_indices_one_dimension(const vector<vector<double>>& points,
-                                              size_t k) {
+    vector<size_t> sorted_indices_one_dimension(const vector<vector<double>>& points,
+                                                size_t k) {
         size_t n = points.size();
         vector<tuple<double, size_t>> values_indices = {};
         for (size_t i = 0; i < n; ++i) {

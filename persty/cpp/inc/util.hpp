@@ -8,8 +8,8 @@ namespace persty_util {
                                        const vector<double> &q);
     bool is_inside(const vector<double> &p,
                    const vector<vector<double>> &box);
-    vector<size_t> sort_indices_one_dimension(const vector<vector<double>>& points,
-                                              size_t k);
+    vector<size_t> sorted_indices_one_dimension(const vector<vector<double>>& points,
+                                                size_t k);
 }
 
 #endif
