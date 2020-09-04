@@ -50,7 +50,9 @@ namespace persty_delaunay {
                                                sorted_indices[j]};
                     edges.push_back(e);
                 }
-                if ( (front_above - front_below) <
+                if ( (front_above - front_below) < (q_x - p_x) ) {
+                    break;
+                }
             }
         }
         return edges;
