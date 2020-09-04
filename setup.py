@@ -88,8 +88,8 @@ class CMakeBuild(build_ext):
         subprocess.check_call(['cmake', os.path.abspath(ext.sourcedir)] + cmake_args, cwd=self.build_temp, env=env)
         subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
 
-minibox = CMakeExtension(name="minibox",
-                         sourcedir="persty/cpp/")
+binding_ext = CMakeExtension(name="binding",
+                             sourcedir="persty/cpp/")
 
 #===========================================================
 
@@ -105,7 +105,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages("."),
-    ext_modules = [minibox],
+    ext_modules = [binding_ext],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
     url="https://github.com/gbeltramo/persty",

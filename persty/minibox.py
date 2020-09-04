@@ -1,4 +1,4 @@
-import persty.cpp.minibox as _cpp
+import persty.cpp.binding as _cpp
 import numpy as np
 
 def test_edges(points):
@@ -17,6 +17,30 @@ def test_edges(points):
                 edges.append((i,j))
     return edges
 
+def edges(points):
+    """
+    Minibox edges of d-dimensional points.
+
+    Parameters
+    ----------
+    points: (n,d) numpy array
+
+    Return
+    ------
+    edges: list of tuples
+        Pairs of indices of `points` representing
+        their Minibox edges.
+    """
+    assert type(points) == np.ndarray, "points must be nd.array"
+    assert len(points.shape) == 2, "points must have shape (n,d), with n number points and d their dimension"
+    dimension = len(points[0])
+    if dimension == 2:
+        return _cpp.minibox_edges_2D(points)
+    elif dimension == 3:
+        return _cpp.brute_minibox_edges(points)
+    elif dimension > 3:
+        return _cpp.brute_minibox_edges(points)
+
 def edges_n_dim(points):
     """
     Minibox edges of d-dimensional points.
@@ -32,4 +56,4 @@ def edges_n_dim(points):
         their Minibox edges.
     """
 
-    return _cpp.edges(points)
+    return _cpp.brute_minibox_edges(points)
