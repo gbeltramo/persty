@@ -21,17 +21,23 @@ print("edges Py:",  ed2[:3], "len(edges) -->", len(ed2))
 print("Equal?", ed1 == ed2)
 
 # test utils
+print("="*10)
+print("TEST UTIL")
 p = np.array([0, 0, 0])
-q = np.array([1, -1, 1])
-z = np.array([0.5, -0.5, 0.5])
+q = np.array([1.5, -0.9, 0.3])
+z = np.array([0.5, 0.6, 0.75])
 mini = _cpp.get_minibox(p, q)
 print("minibox", mini)
 print("True?", _cpp.is_inside(z, mini))
-print("-"*10)
+print()
+print("k side, radius 1:", _cpp.get_k_long_side_radius(p, q))
+print("k side, radius 2:", _cpp.get_k_long_side_radius(p, z))
+print("A_bar1:", _cpp.get_A_r(p, q))
+print("A_bar2:", _cpp.get_A_r(p, z))
 
 
 # timing
-N = 1000
+N = 1_000
 np.random.seed(0)
 
 points2 = np.random.rand(N, 2)
@@ -40,6 +46,7 @@ points10 = np.random.rand(N, 6)
 
 s1 = time()
 ed1 = persty.minibox.edges(points2)
+print("="*10)
 print(f"Time minibox 2-D: {time() - s1:.5f} sec.")
 print("-----\n")
 
@@ -60,13 +67,7 @@ print("-----\n")
 
 s5 = time()
 ed5 =  persty.delaunay.edges(points2)
-print(f"Time delaunay 2-D (C++): {time() - s4:.5f} sec.")
+print(f"Time delaunay 2-D (C++): {time() - s5:.5f} sec.")
 print("-----\n")
 
 print("del_ed_2D_C == del_ed_2D_C++?", ed4 == ed5)
-print()
-print("mini edges:", ed1)
-print()
-print("correct edges:", ed4)
-print()
-print("wrong edges:", ed5)
