@@ -1,8 +1,34 @@
+import persty.cpp.binding as _cpp
+import numpy as np
 from itertools import combinations
 from scipy.spatial.distance import chebyshev
 from gudhi import SimplexTree
-from numpy import max as npmax
-from numpy import fromiter
+
+def get_minibox(p, q):
+    """Minimal enclosing box of p and q."""
+    assert type(p) == np.ndarray, "p must be nd.array"
+    assert type(q) == np.ndarray, "q must be nd.array"
+    assert p.shape == q.shape, "p and q must have same shape"
+    return _cpp.get_minibox(p, q)
+
+def is_inside(p, box):
+    """Check if p is contained in the interior of box."""
+    assert type(p) == np.ndarray, "p must be nd.array"
+    assert type(box) == np.ndarray, "box must be nd.array"
+    assert len(p) == len(box), "p and box must have same length"
+    assert box.shape == (len(box), 2), "elements of box must have length equal to 2"
+    return _cpp.is_inside(p, box)
+
+def get_A_r(p, q):
+    """Return the (d-1)-dimensional box defined by the
+    intersection of the hypercubes of radius equal to
+    half the Chebyshev distance between p and q and
+    centered in these points.
+    """
+    assert type(p) == np.ndarray, "p must be nd.array"
+    assert type(q) == np.ndarray, "q must be nd.array"
+    assert p.shape == q.shape, "p and q must have same shape"
+    return _cpp.get_A_r(p, q)
 
 def clique_triangles(edges, number_points, dimension=2):
     """Return the clique triangles on `edges`
@@ -37,7 +63,8 @@ def clique_triangles(edges, number_points, dimension=2):
     return list(triangles)
 
 def make_gudhi_simplex_tree(points, edges, max_simplex_dim=2, metric=chebyshev):
-    """Returns the `gudhi.SimplexTree()` object containing all simplices up to dimension `max_sim_dim`
+    """Returns the `gudhi.SimplexTree()` object containing
+    all simplices up to dimension `max_sim_dim`
 
     Parameters
     ----------

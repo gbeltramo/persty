@@ -2,9 +2,20 @@
 #include <tuple>
 #include <algorithm>
 
+// #include <iostream>
+
 using namespace std;
 
 namespace persty_util {
+
+    // void print_v_d(vector<double> arr) {
+    //     cout << "[ ";
+    //     for (size_t i = 0; i < arr.size(); ++i) {
+    //         cout << arr[i] << ", ";
+    //     }
+    //     cout << "]\n\n";
+    // }
+
     vector<vector<double>> get_minibox(const vector<double>& p,
                                        const vector<double>& q) {
        size_t dim = p.size();
@@ -51,4 +62,39 @@ namespace persty_util {
         }
         return sorted_indices;
     }
+
+    tuple<size_t, double> get_k_long_side_radius(const vector<double>& p,
+                                                 const vector<double>& q) {
+        size_t dim = p.size();
+        size_t k_long_side = 0;
+        double long_side = max(abs(p[0] - q[0]), 0.0);
+        for (size_t k = 0; k < dim; ++k) {
+            double len_side = max(abs(p[k] - q[k]), 0.0);
+            if (len_side > long_side) {
+                k_long_side = k;
+                long_side = len_side;
+            }
+        }
+        double radius = long_side / 2.0;
+        tuple<size_t, double> res = {k_long_side, radius};
+        return res;
+    }
+
+    vector<vector<double>> get_A_r(const vector<double>& p,
+                                   const vector<double>& q) {
+        size_t dim = p.size();
+        tuple<size_t, double> k_long_radius = get_k_long_side_radius(p, q);
+        size_t k_long_side = get<0>(k_long_radius);
+        double radius = get<1>(k_long_radius);
+        vector<vector<double>> A_r(dim, vector<double>(2,0));
+        for (size_t k = 0; k < dim; ++k) {
+            if (k != k_long_side) {
+                A_r[k] = {max(p[k], q[k]) - radius, min(p[k], q[k]) + radius};
+            } else {
+                A_r[k] = {max(p[k], q[k]) - radius, max(p[k], q[k]) - radius};
+            }
+        }
+        return A_r;
+    }
+
 }

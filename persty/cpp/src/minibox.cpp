@@ -1,8 +1,9 @@
 #include <vector>
 #include <tuple>
-#include <iostream>
 #include <algorithm>
 #include <limits>
+
+#include <iostream>
 
 #include "../inc/util.hpp"
 
@@ -42,20 +43,11 @@ namespace persty_minibox {
         // points need to be sorted along x-axis
         size_t n = points.size();
 
-        // //obtain indices sorted along 0 dimension, then sort points
-        // vector<size_t> sorted_indices = persty_util::sorted_indices_one_dimension(points, 0);
-        // sort(points.begin(), points.end(),
-        //      [](const vector<double>& x, const vector<double>& y) {
-        //             return x[0] < y[0];
-        //      });
-
         vector<tuple<size_t, size_t>> edges = {};
         for (size_t i = 0; i < n; ++i) {
             double p_y = points[i][1];
             double front_above = std::numeric_limits<double>::infinity();
             double front_below = -1 * std::numeric_limits<double>::infinity();
-            //cout << "---\nfront ab: " << front_above << "\n";
-            //cout << "front be: " << front_below << "\n";
             for (size_t j = i+1; j < n; ++j) {
                 double q_x = points[j][0];
                 double q_y = points[j][1];
