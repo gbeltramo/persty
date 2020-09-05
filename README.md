@@ -6,25 +6,43 @@ space with <a href="https://en.wikipedia.org/wiki/Chebyshev_distance">Chebyshev 
 
 ## Installation
 
-Install it with
+The `setuptools`, `numpy` and `scipy` Python packages are prerequisites to using
+this package.
+
+With these installed, the `persty` package can be installed running the following command.
 
 ```
 >>> pip install persty
 ```
 
-For the installation to complete succesfully you need
-
-- `setuptools` and `numpy` installed in the current Python environment;
-- a `C` compiler for the module to be built. On Windows download and install
-  <a href="https://visualstudio.microsoft.com/vs/">Visual Studio community</a>.
-
-To use the functionality of the `persty.util` submodule it is also necessary to
-install the <a href="https://anaconda.org/conda-forge/gudhi">`gudhi`</a> Python package.
-If you installed <a href="https://docs.conda.io/en/latest/">`conda`</a> this can be obtained by running the following command in a terminal window.
+**Note.** To use the `persty.util.make_gudhi_simplex_tree` function, it is necessary to
+install the <a href="https://anaconda.org/conda-forge/gudhi">`gudhi`</a>
+Python package.
 
 ```
 >>> conda install -c conda-forge gudhi
 ```
+
+**Compilation.** Pre-compiled <a href="https://pythonwheels.com/">wheels</a>
+are not available for all platforms.
+
+So running `pip install persty` might require compiling the C++ code in the
+`persty.cpp.binding` submodule. For this to complete successfully you need some
+additional components installed: a C++ compiler, `cmake` version `3.11` or
+greater, and the <a href="https://github.com/pybind/pybind11">`pybind11`</a> Python
+package.
+
+To obtain these we recommend installing `conda` first. Then
+install *both* `cmake` and `pybind11` with `conda`.
+
+```
+>>> conda install -c anaconda cmake
+>>> conda install -c conda-forge pybind11
+```
+
+**Windows.** After installing `conda`, run the above commands within an
+`Anaconda prompt`. For the C++ compiler install
+<a href="https://visualstudio.microsoft.com/vs/">Visual Studio community</a>.
 
 ## Basic usage
 
@@ -34,7 +52,7 @@ import persty.minibox
 import persty.delaunay
 
 np.random.seed(0)
-points = np.random.rand(20, 2).tolist()
+points = np.random.rand(20, 2)
 
 minibox_edges = persty.minibox.edges(points)
 delaunay_edges = persty.delaunay.edges(points)
@@ -42,11 +60,11 @@ delaunay_edges = persty.delaunay.edges(points)
 
 ## Computing Persistent Homology
 
-Minibox and Delaunay edges can be used to compute
-persistent homology in homological dimensions zero and one.
+Minibox and Delaunay edges can be used to compute persistent homology in
+homological dimensions zero and one.
 
-The `pesty` package provides a wrapper function to generate a `gudhi.SimplexTree()`
-object that can be used to compute persistence diagrams of Minibox and Alpha Clique
+The `persty` package provides a wrapper function to generate a `gudhi.SimplexTree()`
+object that can be used to compute persistence diagrams of Minibox and Alpha flag
 filtrations.
 
 The following code computes the zero and one dimensional persistence diagrams
@@ -59,7 +77,7 @@ import persty.util
 from scipy.spatial.distance import chebyshev
 
 np.random.seed(0)
-points = np.random.rand(100, 3).tolist()
+points = np.random.rand(100, 3)
 minibox_edges = persty.minibox.edges(points)
 simplex_tree = persty.util.make_gudhi_simplex_tree(points,
                                                    minibox_edges,
@@ -71,7 +89,7 @@ persistence_diagrams = simplex_tree.persistence(homology_coeff_field=2,
 
 ## Tests
 
-To check that this package was installed correctly you can run the tests in
+To check that this package has been installed correctly you can run the tests in
 the `test/` directory of this repository.
 
 - Download this repository on you computer by running the following command in
@@ -81,10 +99,8 @@ a terminal window.
 >>> git clone https://github.com/gbeltramo/persty.git
 ```
 
-*Note*
-
-On Windows you can obtain `git` by installing the <a href="https://chocolatey.org/">
-`chocolatey`</a> package manager, and running
+**Note.** On Windows you can obtain `git` by installing the
+<a href="https://chocolatey.org/"> `chocolatey`</a> package manager, and running
 
 ```
 >>> choco install git

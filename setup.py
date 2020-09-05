@@ -75,6 +75,6 @@ setup(
     zip_safe=False,
     url="https://github.com/gbeltramo/persty",
     license='GPLv3',
-    install_requires=['numpy'],
+    install_requires=['numpy', 'scipy'],
     keywords='topology data analysis, minibox graph, delaunay graph'
 )
