@@ -3,8 +3,6 @@
 #include <algorithm>
 #include <limits>
 
-#include <iostream>
-
 #include "../inc/util.hpp"
 
 using namespace std;
@@ -46,8 +44,8 @@ namespace persty_minibox {
         vector<tuple<size_t, size_t>> edges = {};
         for (size_t i = 0; i < n; ++i) {
             double p_y = points[i][1];
-            double front_above = std::numeric_limits<double>::infinity();
-            double front_below = -1 * std::numeric_limits<double>::infinity();
+            double front_above = numeric_limits<double>::infinity();
+            double front_below = -1 * numeric_limits<double>::infinity();
             for (size_t j = i+1; j < n; ++j) {
                 double q_x = points[j][0];
                 double q_y = points[j][1];

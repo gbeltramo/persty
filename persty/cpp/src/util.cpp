@@ -2,19 +2,9 @@
 #include <tuple>
 #include <algorithm>
 
-// #include <iostream>
-
 using namespace std;
 
 namespace persty_util {
-
-    // void print_v_d(vector<double> arr) {
-    //     cout << "[ ";
-    //     for (size_t i = 0; i < arr.size(); ++i) {
-    //         cout << arr[i] << ", ";
-    //     }
-    //     cout << "]\n\n";
-    // }
 
     vector<vector<double>> get_minibox(const vector<double>& p,
                                        const vector<double>& q) {

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.11)
-project(persty_cpp_binding VERSION 1.0
+project(persty_cpp_binding VERSION 2.0.0
                            LANGUAGES CXX)
 
 #============================
@@ -38,7 +38,7 @@ add_library(delaunay STATIC
                      inc/delaunay.hpp
                      src/delaunay.cpp)
 target_include_directories(delaunay PUBLIC inc)
-target_link_libraries(delaunay PRIVATE util)
+#target_link_libraries(delaunay PRIVATE util)
 target_compile_features(delaunay PUBLIC cxx_std_14)
 
 #============================
