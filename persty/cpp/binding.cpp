@@ -17,6 +17,4 @@ PYBIND11_MODULE(binding, m) {
     m.def("minibox_edges_2D", &persty_minibox::edges_2D);
     m.def("brute_minibox_edges", &persty_minibox::brute_edges);
     m.def("horizontal_delaunay_edges_2D", &persty_delaunay::horizontal_edges_2D);
-
-    m.attr("__version__") = 2.0.0
 }
