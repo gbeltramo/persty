@@ -15,13 +15,17 @@ print("n*(n-1)/2 =", N*(N-1)//2)
 # correctness sanity check
 print("="*10)
 print("SANITY CHECK MINIBOX EDGES")
+sorted_indices = np.argsort(points[:,0])
+points = points[sorted_indices]
+
 ed1 = persty.minibox.edges(points)
 ed2 = persty.minibox.edges_n_dim(points)
-print("edges 2-D:", ed1[:3], "len(edges) -->", len(ed1))
+print(f"shape input points is {points.shape}")
+print("edges:", ed1[:3], "len(edges) -->", len(ed1))
 print("edges n-D:", ed2[:3], "len(edges) -->", len(ed2))
 print("minibox edges equal?", ed1 == ed2)
 
-# test utils
+# # test utils
 print("="*10)
 print("TEST UTIL")
 p = np.array([0, 0, 0])

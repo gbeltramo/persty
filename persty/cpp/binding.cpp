@@ -15,6 +15,7 @@ PYBIND11_MODULE(binding, m) {
     m.def("get_k_long_side_radius", &persty_util::get_k_long_side_radius);
     m.def("get_A_r", &persty_util::get_A_r);
     m.def("minibox_edges_2D", &persty_minibox::edges_2D);
+    m.def("minibox_edges_3D", &persty_minibox::edges_3D);
     m.def("brute_minibox_edges", &persty_minibox::brute_edges);
     m.def("horizontal_delaunay_edges_2D", &persty_delaunay::horizontal_edges_2D);
 }
