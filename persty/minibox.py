@@ -33,7 +33,7 @@ def edges(points):
 
 def edges_n_dim(points):
     """
-    Minibox edges of d-dimensional points.
+    Minibox edges of d-dimensional points with brute force algorithm.
 
     Parameters
     ----------
@@ -45,5 +45,6 @@ def edges_n_dim(points):
         Pairs of indices of `points` representing
         their Minibox edges.
     """
-
+    assert type(points) == np.ndarray, "points must be nd.array"
+    assert len(points.shape) == 2, "points must have shape (n,d), with n number points and d their dimension"
     return _cpp.brute_minibox_edges(points)
