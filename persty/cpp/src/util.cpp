@@ -1,5 +1,7 @@
 #include <vector>
 #include <tuple>
+#include <map>
+#include <set>
 #include <algorithm>
 
 using namespace std;
@@ -85,6 +87,41 @@ namespace persty_util {
             }
         }
         return A_r;
+    }
+
+    vector<tuple<size_t, size_t, size_t>> get_clique_triangles(vector<tuple<size_t, size_t>> edges) {
+        map<size_t, set<size_t>> graph_edges = {};
+        for (const auto& e: edges) {
+            size_t i = get<0>(e);
+            size_t j = get<1>(e);
+            graph_edges[i].insert(j);
+            graph_edges[j].insert(i);
+        }
+
+        set<tuple<size_t, size_t, size_t>> triangles = {};
+        for (const auto& e: edges) {
+            size_t i = get<0>(e);
+            size_t j = get<1>(e);
+            for (const auto& k: graph_edges[i]) {
+                auto search = graph_edges[j].find(k);
+                if (search != graph_edges[j].end()) {
+                    tuple<size_t, size_t, size_t> tri = {};
+                    if (k < i) {
+                        tri = {k, i, j};
+                    } else if (k < j) {
+                        tri = {i, k, j};
+                    } else {
+                        tri = {i, j, k};
+                    }
+                    triangles.insert(tri);
+                }
+            }
+        }
+        vector<tuple<size_t, size_t, size_t>> vec_triangles = {};
+        for (const auto& tri: triangles) {
+            vec_triangles.push_back(tri);
+        }
+        return vec_triangles;
     }
 
 }

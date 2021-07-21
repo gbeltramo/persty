@@ -1,6 +1,7 @@
 #ifndef PERSTY_UTIL_HPP
 #define PERSTY_UTIL_HPP
 
+#include <set>
 using namespace std;
 
 namespace persty_util {
@@ -14,6 +15,7 @@ namespace persty_util {
                                                  const vector<double>& q);
     vector<vector<double>> get_A_r(const vector<double>& p,
                                    const vector<double>& q);
+    vector<tuple<size_t, size_t, size_t>> get_clique_triangles(vector<tuple<size_t, size_t>> edges);
 }
 
 #endif

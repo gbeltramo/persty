@@ -30,7 +30,7 @@ def get_A_r(p, q):
     assert p.shape == q.shape, "p and q must have same shape"
     return _cpp.get_A_r(p, q)
 
-def clique_triangles(edges, number_points, dimension=2):
+def clique_triangles_and_parameter(points, edges, metric=chebyshev):
     """Return the clique triangles on `edges`
 
     Parameters
@@ -39,8 +39,6 @@ def clique_triangles(edges, number_points, dimension=2):
         The edges of a graph built on some finite set of points
     number_points: int
         The number of vertices of the graph to which the edges belong
-    dimension: int >=2
-        Dimension of clique simplices returned
 
     Return
     ------
@@ -48,19 +46,12 @@ def clique_triangles(edges, number_points, dimension=2):
         The clique triangles on the given edges
 
     """
-
-    dict_graph = {i: list() for i in range(number_points)}
-    for i, j in edges:
-        dict_graph[i].append(j)
-        dict_graph[j].append(i)
-    dict_graph = {key: set(value) for key, value in dict_graph.items()}
-
-    triangles = set()
-    for i, j in edges:
-        for el in dict_graph[i]:
-            if el in dict_graph[j]:
-                triangles.add(tuple(sorted([i, j, el])))
-    return list(triangles)
+    number_points = len(points)
+    triangles = _cpp.get_clique_triangles(edges)
+    radius_param = [max(metric(points[i1], points[i2]),
+                        metric(points[i1], points[i3]),
+                        metric(points[i2], points[i3])) for i1, i2, i3 in triangles]
+    return triangles, radius_param
 
 def make_gudhi_simplex_tree(points, edges, max_simplex_dim=2, metric=chebyshev):
     """Returns the `gudhi.SimplexTree()` object containing
