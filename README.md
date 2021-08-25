@@ -6,14 +6,36 @@ space with <a href="https://en.wikipedia.org/wiki/Chebyshev_distance">Chebyshev 
 
 ## Installation
 
-The `setuptools`, `numpy` and `scipy` Python packages are prerequisites to using
-this package.
+The `setuptools`, `numpy`, and `scipy` Python packages are
+prerequisites for using this package.
 
-With these installed, the `persty` package can be installed running the following command.
+You'll also need `pybind11`, `cmake` and a `C++` compiler in order to install this
+package. It is recommended to install both `pybind11` and `cmake` via `conda`.
+
+```
+>>> conda install -c anaconda cmake
+>>> conda install -c conda-forge pybind11
+```
+
+Finally run the following command to build and install this Python package
 
 ```
 >>> pip install persty
 ```
+
+If the command above fails to build this package, then you might want to clone
+this repository to a directory `persty/` on your computer and run
+
+```
+>>> cd /<path>/<to>/<cloned>/<repo>/persty/
+>>> python setup.py install
+```
+
+which outputs more information on the errors causing the build to fail.
+
+**Windows.** After installing `conda`, run the above commands within an
+`Anaconda prompt`. For the C++ compiler install
+<a href="https://visualstudio.microsoft.com/vs/">Visual Studio community</a>.
 
 **Note.** To use the `persty.util.make_gudhi_simplex_tree` function, it is necessary to
 install the <a href="https://anaconda.org/conda-forge/gudhi">`gudhi`</a>
@@ -22,27 +44,6 @@ Python package.
 ```
 >>> conda install -c conda-forge gudhi
 ```
-
-**Compilation.** Pre-compiled <a href="https://pythonwheels.com/">wheels</a>
-are not available for all platforms.
-
-So running `pip install persty` might require compiling the C++ code in the
-`persty.cpp.binding` submodule. For this to complete successfully you need some
-additional components installed: a C++ compiler, `cmake` version `3.11` or
-greater, and the <a href="https://github.com/pybind/pybind11">`pybind11`</a> Python
-package.
-
-To obtain these we recommend installing `conda` first. Then
-install *both* `cmake` and `pybind11` with `conda`.
-
-```
->>> conda install -c anaconda cmake
->>> conda install -c conda-forge pybind11
-```
-
-**Windows.** After installing `conda`, run the above commands within an
-`Anaconda prompt`. For the C++ compiler install
-<a href="https://visualstudio.microsoft.com/vs/">Visual Studio community</a>.
 
 ## Basic usage
 
