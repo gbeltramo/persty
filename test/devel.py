@@ -13,7 +13,7 @@ from gudhi import RipsComplex, SimplexTree
 from scipy.spatial.distance import chebyshev
 from sklearn.metrics import pairwise_distances
 
-print("="*60)
+print("=" * 60)
 
 # input
 np.random.seed(0)
@@ -22,7 +22,7 @@ points = np.random.rand(N, d)
 # print("n*(n-1)/2 =", N*(N-1)//2)
 #
 # correctness sanity check
-print("="*10)
+print("=" * 10)
 # print("SANITY CHECK MINIBOX EDGES")
 # sorted_indices = np.argsort(points[:,0])
 # points = points[sorted_indices]
@@ -77,7 +77,7 @@ print("="*10)
 
 
 # timing minibox high-dim
-print("="*10)
+print("=" * 10)
 N = 1000
 d = 5
 print(f"TIMINGS --> n = {N} points, dim = {d}")
@@ -91,11 +91,12 @@ print(f"-----\nTime minibox {d}-D: {time() - s:.5f} sec.")
 triangles = _cpp.get_clique_triangles(ed)
 tot = len(points) + len(ed) + len(triangles)
 print(f"There are {len(ed)} Minibox edges --> {N*(N-1)//2} is max number of edges")
-print(f"There are {len(triangles)} Minibox triangles --> {N*(N-1)*(N-2)//3} is max number of triangles")
+print(
+    f"There are {len(triangles)} Minibox triangles --> {N*(N-1)*(N-2)//3} is max number of triangles"
+)
 print(f"Ratio simplices = {tot / (N + N*(N-1)//2 + N*(N-1)*(N-2)//3):.5f}")
 
 print()
-
 
 
 process = psutil.Process(os.getpid())
@@ -125,7 +126,7 @@ memory_start = process.memory_info().rss // 1048576
 # print(f"Memory used to compute Minibox: {mmb2 - mmb1} Mb.")
 
 ## RIPS
-print("="*20)
+print("=" * 20)
 # process = psutil.Process(os.getpid())
 # mmb1 = process.memory_info().rss // 1048576
 # s = time()
@@ -173,7 +174,7 @@ print("="*20)
 # print(f"Memory used to compute Cech: {mmb2 - mmb1} Mb.")
 
 # final check
-print("="*20)
+print("=" * 20)
 # print("Equal Minibox and Rips?", dgm1 == dgm2)
 # print("Equal Minibox and Cech?", dgm1 == dgm2)
 # print("Equal Cech and Rips?", dgm3 == dgm2)
